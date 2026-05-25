@@ -1,0 +1,63 @@
+{
+  "name": "@flun/dns-auto-ssl",
+  "version": "1.0.0",
+  "description": "自动通过 DNS API 申请 Let's Encrypt SSL 证书（支持通配符），并配置跨平台自动续期任务",
+  "keywords": [
+    "ssl",
+    "https",
+    "certificate",
+    "letsencrypt",
+    "acme",
+    "dns",
+    "auto-renew",
+    "wildcard",
+    "cross-platform"
+  ],
+  "author": "flun <cn@flun.top>",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OpenFlun/dns-auto-ssl.git"
+  },
+  "homepage": "https://github.com/OpenFlun/dns-auto-ssl#readme",
+  "bugs": {
+    "url": "https://github.com/OpenFlun/dns-auto-ssl/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "exports": {
+    ".": "./index.js"
+  },
+  "bin": {
+    "dns-auto-ssl": "./bin/cli.js"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "bin/",
+    "lib/",
+    "copy-files.js",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "postinstall": "node copy-files.js 2>&1",
+    "test": "node --test",
+    "lint": "eslint .",
+    "prepublishOnly": "npm run lint && npm test"
+  },
+  "dependencies": {
+    "commander": "^14.0.3",
+    "tar": "^7.5.15",
+    "adm-zip": "^0.5.17"
+  },
+  "engines": {
+    "node": ">=22.12.0",
+    "npm": ">=10.0.0"
+  }
+}
