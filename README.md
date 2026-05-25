@@ -42,20 +42,39 @@ npx @flun/dns-auto-ssl --email me@example.com --domains example.com,www.example.
 
 ```js
 import { setup } from '@flun/dns-auto-ssl';
+import fs from 'fs';
 
-const result = await setup({
-  email: 'me@example.com',
-  domains: ['example.com', '*.example.com'],
-  dnsProvider: 'alidns',
-  apiEnv: {
-    ALICLOUD_ACCESS_KEY: 'xxx',
-    ALICLOUD_SECRET_KEY: 'yyy'
-  },
-  wildcard: false,
-  setupRenew: true
-});
+const API_ENV = {
+  ALICLOUD_ACCESS_KEY: process.env.ALICLOUD_ACCESS_KEY,
+  ALICLOUD_SECRET_KEY: process.env.ALICLOUD_SECRET_KEY,
+};
 
-console.log(result.certPath, result.keyPath);
+try {
+  const result = await setup({
+    email: 'your-email@example.com',
+    domains: ['test.example.com'],          // 替换为你的真实测试域名
+    dnsProvider: 'alidns',                  // 根据服务商修改
+    apiEnv: API_ENV,
+    wildcard: false,                        // 是否自动添加通配符
+    setupRenew: true,                       // 配置自动续期任务
+  });
+
+  // 打印域名列表
+  console.log('✅ 证书申请成功');
+  console.log('涵盖域名:', result.domains.join(', '));
+  console.log('证书文件路径:', result.certPath);
+  console.log('私钥文件路径:', result.keyPath);
+  console.log('自动续期任务已配置:', result.renewTaskConfigured);
+
+  // 可选：验证证书文件真实存在且包含域名信息
+  const certContent = fs.readFileSync(result.certPath, 'utf8');
+  if (certContent.includes('test.example.com')) {
+    console.log('✓ 证书内容包含目标域名');
+  }
+} catch (err) {
+  console.error('❌ 失败:', err.message);
+  process.exit(1);
+}
 ```
 
 # 许可证
