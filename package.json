@@ -1,7 +1,7 @@
 {
   "name": "@flun/dns-auto-ssl",
   "version": "1.0.0",
-  "description": "自动通过 DNS API 申请 Let's Encrypt SSL 证书（支持通配符），并配置跨平台自动续期任务",
+  "description": "自动通过 DNS API 申请 SSL 证书并配置自动续期 (基于 lego v5)",
   "keywords": [
     "ssl",
     "https",
@@ -10,8 +10,7 @@
     "acme",
     "dns",
     "auto-renew",
-    "wildcard",
-    "cross-platform"
+    "wildcard"
   ],
   "author": "flun <cn@flun.top>",
   "license": "ISC",
@@ -40,6 +39,7 @@
     "index.d.ts",
     "bin/",
     "lib/",
+    "prebuilt/",
     "copy-files.js",
     "README.md",
     "CHANGELOG.md",

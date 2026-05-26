@@ -1,6 +1,6 @@
 # @flun/dns-auto-ssl
 
-本工具库能将您的 Node.js 应用程序作为 dns-auto-ssl 后台服务来运行和管理,支持服务的安装、启动、停止及卸载全流程;还提供事件日志等功能,它主要用于面向生产环境应用程序的部署与运维;如需联系,邮箱: [cn@flun.top](mailto:cn@flun.top)
+本工具库自动通过 DNS API 申请 Let's Encrypt SSL 证书并配置跨平台自动续期（基于 lego v5）。;如需联系,邮箱: [cn@flun.top](mailto:cn@flun.top)
 
 ### 本包基于 ESM 模块系统编写->拥抱未来趋势
 
@@ -17,8 +17,6 @@
 
 全局安装：`npm i -g @flun/dns-auto-ssl`
 
-然后在项目根目录执行：`npm link @flun/dns-auto-ssl`
-
 局部安装:`npm i @flun/dns-auto-ssl`
 
 ---
@@ -27,7 +25,7 @@
 
 ### CLI 方式
 ```bash
-npx @flun/dns-auto-ssl --email me@example.com --domains example.com,www.example.com --provider alidns --api-key xxx --api-secret yyy --wildcard
+dns-auto-ssl --email me@example.com --domains example.com --provider alidns --api-key xxx --api-secret yyy --wildcard
 ```
 
 ### 函数参数方式
@@ -36,17 +34,15 @@ npx @flun/dns-auto-ssl --email me@example.com --domains example.com,www.example.
 import { setup } from '@flun/dns-auto-ssl';
 import fs from 'fs';
 
-const API_ENV = {
-  ALICLOUD_ACCESS_KEY: process.env.ALICLOUD_ACCESS_KEY,
-  ALICLOUD_SECRET_KEY: process.env.ALICLOUD_SECRET_KEY,
-};
-
 try {
   const result = await setup({
     email: 'your-email@example.com',
-    domains: ['test.example.com'],          // 替换为你的真实测试域名
+    domains: ['example.com', 'www.example.com'],          // 替换为你的真实测试域名
     dnsProvider: 'alidns',                  // 根据服务商修改
-    apiEnv: API_ENV,
+    apiEnv: {
+       ALICLOUD_ACCESS_KEY: 'xxx',
+       ALICLOUD_SECRET_KEY: 'yyy'
+    },
     wildcard: false,                        // 是否自动添加通配符
     setupRenew: true,                       // 配置自动续期任务
   });
@@ -56,11 +52,10 @@ try {
   console.log('涵盖域名:', result.domains.join(', '));
   console.log('证书文件路径:', result.certPath);
   console.log('私钥文件路径:', result.keyPath);
-  console.log('自动续期任务已配置:', result.renewTaskConfigured);
 
   // 可选：验证证书文件真实存在且包含域名信息
   const certContent = fs.readFileSync(result.certPath, 'utf8');
-  if (certContent.includes('test.example.com')) {
+  if (certContent.includes('www.example.com')) {
     console.log('✓ 证书内容包含目标域名');
   }
 } catch (err) {
