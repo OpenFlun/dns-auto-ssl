@@ -1,32 +1,29 @@
 import { setup } from '@flun/dns-auto-ssl';
-import { env } from '@flun/env';
-import fs from 'fs';
+import fs from 'node:fs';
 
-try {
-	const result = await setup({
-		email: 'china@lunjack.com',
-		domains: ['kdg.123xyz.cn'],
-		dnsProvider: 'alidns',
-		apiEnv: {
-			ALICLOUD_ACCESS_KEY: env.ALI_ACCESS_KEY_ID,
-			ALICLOUD_SECRET_KEY: env.ALI_ACCESS_KEY_SECRET
-		},
-		wildcard: false,                        // 是否自动添加通配符
-		setupRenew: true,                       // 配置自动续期任务
-	});
+// 2. 直接调用 setup 函数（顶层 await，无需 async 包装）
+const result = await setup({
+	// ---------- 必填项 ----------
+	email: 'you@example.com',                    // 你的邮箱，用于 Let's Encrypt 通知
+	domains: ['example.com', 'www.example.com'], // 需要证书的域名列表（支持多个）
+	dnsProvider: 'alidns',                       // DNS 服务商代码：阿里云=alidns，腾讯云=dnspod，Cloudflare=cloudflare
 
-	// 打印域名列表
-	console.log('✅ 证书申请成功');
-	console.log('涵盖域名:', result.domains.join(', '));
-	console.log('证书文件路径:', result.certPath);
-	console.log('私钥文件路径:', result.keyPath);
+	// ---------- API 密钥（根据 dnsProvider 选择对应的键值对）----------
+	apiEnv: {
+		// 如果你使用【阿里云】，请填写以下两项，并注释掉其他服务商的配置
+		ALICLOUD_ACCESS_KEY: '你的AccessKeyId',     // 阿里云 RAM 用户的 AccessKey ID
+		ALICLOUD_SECRET_KEY: '你的AccessKeySecret', // 阿里云 RAM 用户的 AccessKey Secret
 
-	// 可选：验证证书文件真实存在且包含域名信息
-	const certContent = fs.readFileSync(result.certPath, 'utf8');
-	if (certContent.includes('kdg.123xyz.cn')) {
-		console.log('✓ 证书内容包含目标域名');
-	}
-} catch (err) {
-	console.error('❌ 失败:', err.message);
-	process.exit(1);
-}
+		// 如果你使用【腾讯云 DNSPod】，请取消注释以下两项，并注释掉阿里云的部分
+		// TENCENTCLOUD_SECRET_ID: '你的SecretId',     // 腾讯云 API 密钥的 SecretId
+		// TENCENTCLOUD_SECRET_KEY: '你的SecretKey',   // 腾讯云 API 密钥的 SecretKey
+
+		// 如果你使用【Cloudflare】，请取消注释以下一项，并注释掉其他部分
+		// CF_API_TOKEN: '你的Cloudflare APIToken',    // Cloudflare API Token（需要 Zone:DNS:Edit 权限）
+	},
+
+	// ---------- 可选参数 ----------
+	wildcard: true,       // 是否自动添加通配符域名（例如 *.example.com）
+	setupRenew: true,     // 是否配置系统自动续期任务（默认 true，每天凌晨3点检查）
+	staging: false,       // 是否使用 Let's Encrypt 测试环境（用于避免速率限制，正式环境请保持 false）
+});
