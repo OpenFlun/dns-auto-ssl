@@ -1,48 +1,34 @@
-#!/usr/bin/env node
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-import fs from 'node:fs';
-import path from 'node:path';
-import os from 'node:os';
-import { fileURLToPath } from 'node:url';
+// 要复制的文件位置和文件目标位置
+const __filename = fileURLToPath(import.meta.url), __dirname = path.dirname(__filename),
+    fileName = 'DnsAutoSSL.js', targetDir = path.resolve(__dirname, '../../..'),
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const packageRoot = path.resolve(__dirname);
+    // 要拷贝的文件和目标文件路径
+    sourceFile = path.join(__dirname, fileName), targetFile = path.join(targetDir, fileName);
 
-function getPlatformDir() {
-    const platform = os.platform();
-    if (platform === 'win32') return 'win32';
-    if (platform === 'linux') return 'linux';
-    if (platform === 'darwin') return 'darwin';
-    throw new Error(`不支持的操作系统: ${platform}`);
-}
+/**
+ * 复制文件到项目根目录
+ * >查看定义:@see {@link copyFile}
+ * @returns {boolean} - 复制是否成功
+ */
+const copyFile = () => {
+    console.log(`🔍 检查 ${fileName} 文件...`), console.log(`📁 项目根目录:${targetDir}`);
+    try {
+        if (fs.existsSync(targetFile)) return true;  // 如果目标文件存在,则返回true并结束函数
+        console.log(`⚠️ 在项目根目录未找到 ${fileName} 文件，正在创建...`);
 
-function copyLego() {
-    const platformDir = getPlatformDir();
-    const sourceDir = path.join(packageRoot, 'prebuilt', platformDir);
-    const targetDir = path.join(packageRoot, 'bin');
-    const sourceFile = path.join(sourceDir, os.platform() === 'win32' ? 'lego.exe' : 'lego');
-    const targetFile = path.join(targetDir, os.platform() === 'win32' ? 'lego.exe' : 'lego');
-
-    if (!fs.existsSync(sourceFile)) {
-        console.error(`错误: 预置文件不存在 ${sourceFile}`);
-        console.error(`请确保已下载 lego v5.1.0 对应平台的二进制文件并放入 prebuilt/${platformDir}/ 目录`);
-        process.exit(1);
+        fs.copyFileSync(sourceFile, targetFile);     // 复制源文件到项目根目录
+        console.log(`✓ 已创建 ${fileName} 示例文件:${targetFile}`);
+        return true;
+    } catch (error) {
+        console.error(`✗ 创建 ${fileName} 文件失败:`, error.message);
+        return false;
     }
-
-    fs.mkdirSync(targetDir, { recursive: true });
-    fs.copyFileSync(sourceFile, targetFile);
-
-    if (os.platform() !== 'win32') {
-        fs.chmodSync(targetFile, 0o755);
-    }
-
-    console.log(`✅ lego 已安装到 ${targetFile}`);
 }
 
-try {
-    copyLego();
-} catch (err) {
-    console.error('安装 lego 失败:', err.message);
-    process.exit(1);
-}
+// 执行脚本并导出函数
+if (process.argv[1] === __filename) copyFile();
+export { copyFile };
