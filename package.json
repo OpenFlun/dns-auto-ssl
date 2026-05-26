@@ -41,6 +41,7 @@
     "lib/",
     "prebuilt/",
     "copy-files.js",
+    "DnsAutoSSL.js",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
