@@ -5,8 +5,7 @@ import { dnsAutoSslDir } from '../lib/shard.js';
 import { setup } from '../index.js';
 
 const program = new Command();
-program
-    .name('dns-auto-ssl')
+program.name('dns-auto-ssl')
     .description('自动通过 DNS API 申请 Let\'s Encrypt SSL 证书，支持通配符和自动续期')
     .option('-e, --email <email>', '邮箱地址 (必填)')
     .option('-d, --domains <domains>', '域名，多个用逗号分隔 (必填)')
