@@ -50,33 +50,42 @@ npm i @flun/dns-auto-ssl
 
 ### 2. 申请证书
 
-#### 方式一：CLI（全局安装后）
+#### 方式一：CLI（命令行）
 
+> **💡 Windows 用户特别注意**
+> - 以下示例默认给出**单行命令**，可直接复制到 PowerShell 或 cmd 中运行。
+> - 不要使用反斜杠 `\` 换行（那仅适用于 Linux/macOS 的 bash/zsh）。
+> - 如果密钥值包含特殊字符（如 `=`、空格、`&`），请用双引号包裹整个 `KEY=value`：`--env "KEY=value with spaces"`。
+
+**全局安装后**（推荐）：
 ```bash
 # 阿里云示例（同时申请裸域和通配符）
-dns-auto-ssl \
-  --email you@example.com \
-  --domains example.com \
-  --provider alidns \
-  --env ALICLOUD_ACCESS_KEY=你的AccessKeyId \
-  --env ALICLOUD_SECRET_KEY=你的AccessKeySecret \
-  --wildcard
+dns-auto-ssl --email you@example.com --domains example.com --provider alidns --env ALICLOUD_ACCESS_KEY=你的AccessKeyId --env ALICLOUD_SECRET_KEY=你的AccessKeySecret --wildcard
 
 # 腾讯云 DNSPod 示例
-dns-auto-ssl \
-  --email you@example.com \
-  --domains example.com \
-  --provider dnspod \
-  --env TENCENTCLOUD_SECRET_ID=你的SecretId \
-  --env TENCENTCLOUD_SECRET_KEY=你的SecretKey
+dns-auto-ssl --email you@example.com --domains example.com --provider dnspod --env TENCENTCLOUD_SECRET_ID=你的SecretId --env TENCENTCLOUD_SECRET_KEY=你的SecretKey
 
 # Cloudflare 示例
-dns-auto-ssl \
-  --email you@example.com \
-  --domains example.com \
-  --provider cloudflare \
-  --env CF_API_TOKEN=你的Token
+dns-auto-ssl --email you@example.com --domains example.com --provider cloudflare --env CF_API_TOKEN=你的Token
 ```
+
+**使用 npx（无需全局安装）**：
+```bash
+npx @flun/dns-auto-ssl --email you@example.com --domains example.com --provider alidns --env ALICLOUD_ACCESS_KEY=你的AccessKeyId --env ALICLOUD_SECRET_KEY=你的AccessKeySecret --wildcard
+```
+
+> **多行命令写法（仅适用于 Linux / macOS bash/zsh）**
+> 若你更喜欢多行，可以使用反斜杠换行：
+> ```bash
+> dns-auto-ssl \
+>   --email you@example.com \
+>   --domains example.com \
+>   --provider alidns \
+>   --env ALICLOUD_ACCESS_KEY=你的AccessKeyId \
+>   --env ALICLOUD_SECRET_KEY=你的AccessKeySecret \
+>   --wildcard
+> ```
+> **Windows PowerShell 用户请勿使用反斜杠**，请使用上面给出的单行命令，或使用反引号 `` ` `` 换行（不推荐，易出错）。
 
 **参数说明**
 
@@ -97,6 +106,7 @@ dns-auto-ssl \
 // 1. 导入核心模块
 import { setup } from '@flun/dns-auto-ssl';
 import fs from 'node:fs';
+import { X509Certificate } from 'node:crypto';
 
 // 2. 直接调用 setup 函数（顶层 await，无需 async 包装）
 const result = await setup({
@@ -120,9 +130,10 @@ const result = await setup({
   },
 
   // ---------- 可选参数 ----------
-  wildcard: true,       // 是否自动添加通配符域名（例如 *.example.com）
-  setupRenew: true,     // 是否配置系统自动续期任务（默认 true，每天凌晨3点检查）
-  staging: false,       // 是否使用 Let's Encrypt 测试环境（用于避免速率限制，正式环境请保持 false）
+  staging: false,       // 是否使用 Let's Encrypt 测试环境（用于避免速率限制,正式环境请保持 false,默认false）
+  certPath:'自定义路径', // 自定义证书路径
+  wildcard: true,       // 是否自动添加通配符域名（例如 *.example.com,默认false）
+  setupRenew: true      // 是否配置系统自动续期任务（默认 true，每天凌晨3点检查）
 });
 
 // 3. 打印申请结果
@@ -133,8 +144,8 @@ console.log('私钥文件路径:', result.keyPath);
 console.log('自动续期任务已配置:', result.renewTaskConfigured);
 
 // 4. 可选：验证证书是否包含目标域名
-const certContent = fs.readFileSync(result.certPath, 'utf8');
-if (certContent.includes('example.com')) console.log('✓ 证书内容验证通过，包含目标域名');
+const cert = new X509Certificate(fs.readFileSync(result.certPath));
+if (cert.subjectAltName?.includes(`DNS:${result.domains[0]}`)) console.log('✓ 验证通过(包含目标域名)');
 ```
 
 > **注意**：`apiEnv` 中的**键名必须与上表中的环境变量名称完全一致**（区分大小写）。不同的 DNS 服务商需要提供不同的键值对。
@@ -186,7 +197,7 @@ https.createServer(options, (req, res) => {
 **验证续期任务是否添加成功**
 
 - **Linux/macOS**: `crontab -l | grep dns-auto-ssl`
-- **Windows**: 打开“任务计划程序” → 查找 `DNSAutoSSL-Renew`
+- **Windows**: 打开“任务计划程序” → 查找以主域名命名的计划任务名
 
 > 💡 若需立即测试续期，可手动执行 crontab 中的命令（复制出来运行）
 
@@ -218,6 +229,24 @@ https.createServer(options, (req, res) => {
 **解决**：
 - **Linux/macOS**：使用 `sudo node server.js`
 - **Windows**：以管理员身份运行命令提示符或 PowerShell
+
+### ❌ Windows PowerShell 中执行多行命令报错：`Missing expression after unary operator '--'`
+
+**原因**：PowerShell 不支持反斜杠 `\` 作为换行符，且 `--` 在 PowerShell 中有特殊含义。
+
+**解决方案**：
+- **使用单行命令**（推荐）：将所有参数写在一行，去掉反斜杠。
+- 如果必须换行，请使用反引号 `` ` ``，但容易出错，不推荐。
+- 或者切换到**命令提示符 (cmd)**，cmd 使用 `^` 作为换行符。
+
+示例（正确）：
+```powershell
+# 单行（直接复制）
+dns-auto-ssl --email you@example.com --domains example.com --provider alidns --env ALICLOUD_ACCESS_KEY=xxx --env ALICLOUD_SECRET_KEY=yyy
+
+# 如果未全局安装，使用 npx
+npx @flun/dns-auto-ssl --email you@example.com --domains example.com --provider alidns --env ALICLOUD_ACCESS_KEY=xxx --env ALICLOUD_SECRET_KEY=yyy
+```
 
 ### ⚠️ 通配符证书生效范围
 
@@ -253,7 +282,7 @@ dns-auto-ssl --provider dnspod --env TENCENTCLOUD_SECRET_ID=xxx --env TENCENTCLO
 
 ---
 
-## 卸载与清理
+## 清理
 
 ```bash
 # 删除证书和账户数据（可选）
@@ -274,11 +303,3 @@ ISC License
 欢迎提交 Issue 或 Pull Request 至 [GitHub 仓库](https://github.com/OpenFlun/dns-auto-ssl)
 
 邮箱: [cn@flun.top](mailto:cn@flun.top)
-
-这份 README 已包含：
-- 不同 DNS 服务商所需环境变量的对照表
-- 清晰的 CLI 和 API 示例（分开列出常见服务商）
-- 常见错误的解决方案（包括速率限制、通配符误区、环境变量混淆等）
-- 安全提醒和续期验证方法
-
-用户可以根据自己的 DNS 服务商直接复制对应的示例进行修改，不会再有“只看到阿里云变量名”的困惑。

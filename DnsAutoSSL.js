@@ -1,5 +1,6 @@
 import { setup } from '@flun/dns-auto-ssl';
 import fs from 'node:fs';
+import { X509Certificate } from 'node:crypto';
 
 // 2. 直接调用 setup 函数（顶层 await，无需 async 包装）
 const result = await setup({
@@ -23,7 +24,19 @@ const result = await setup({
 	},
 
 	// ---------- 可选参数 ----------
+	// certPath: '自定义路径', // 自定义证书路径（默认安装在你的用户主目录下）
 	wildcard: true,       // 是否自动添加通配符域名（例如 *.example.com）
 	setupRenew: true,     // 是否配置系统自动续期任务（默认 true，每天凌晨3点检查）
 	staging: false,       // 是否使用 Let's Encrypt 测试环境（用于避免速率限制，正式环境请保持 false）
 });
+
+// 3. 打印申请结果
+console.log('✅ 证书申请成功！');
+console.log('涵盖域名:', result.domains.join(', '));
+console.log('证书文件路径:', result.certPath);
+console.log('私钥文件路径:', result.keyPath);
+console.log('自动续期任务已配置:', result.renewTaskConfigured);
+
+// 4. 可选：验证证书是否包含目标域名
+const cert = new X509Certificate(fs.readFileSync(result.certPath));
+if (cert.subjectAltName?.includes(`DNS:${result.domains[0]}`)) console.log('✓ 验证通过(包含目标域名)');
