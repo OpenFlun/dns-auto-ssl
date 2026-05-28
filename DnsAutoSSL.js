@@ -41,5 +41,5 @@ console.log('自动续期任务已配置:', renewTaskConfigured);
 const cert = new X509Certificate(fs.readFileSync(certPath));
 if (cert.subjectAltName?.includes(`DNS:${domains[0]}`)) console.log('✓ 验证通过(包含目标域名)');
 
-// 导出结果供其他它模块使用(注意如果有导出需求建议注释或删除步骤3和4的验证代码,避免无畏的文件读取和证书解析)
+// 导出结果供其他它模块使用(注意如果有导出需求建议注释或删除步骤3和4的验证代码及辅助导入的模块,避免无畏的文件读取和证书解析)
 export { domains, certPath, keyPath };
