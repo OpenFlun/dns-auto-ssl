@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { X509Certificate } from 'node:crypto';
 
 // 2. 直接调用 setup 函数（顶层 await，无需 async 包装）
-const result = await setup({
+const { domains, certPath, keyPath, renewTaskConfigured } = await setup({
 	// ---------- 必填项 ----------
 	email: 'you@example.com',                    // 你的邮箱，用于 Let's Encrypt 通知
 	domains: ['example.com', 'www.example.com'], // 需要证书的域名列表（支持多个）
@@ -25,18 +25,21 @@ const result = await setup({
 
 	// ---------- 可选参数 ----------
 	// certPath: '自定义路径', // 自定义证书路径（默认安装在你的用户主目录下）
-	wildcard: true,       // 是否自动添加通配符域名（例如 *.example.com）
+	wildcard: true,       // 是否自动添加通配符域名（例如 *.example.com,默认 false）
 	setupRenew: true,     // 是否配置系统自动续期任务（默认 true，每天凌晨3点检查）
-	staging: false,       // 是否使用 Let's Encrypt 测试环境（用于避免速率限制，正式环境请保持 false）
+	staging: false,       // 是否使用 Let's Encrypt 测试环境（用于避免速率限制,正式环境请保持默认的 false）
 });
 
 // 3. 打印申请结果
 console.log('✅ 证书申请成功！');
-console.log('涵盖域名:', result.domains.join(', '));
-console.log('证书文件路径:', result.certPath);
-console.log('私钥文件路径:', result.keyPath);
-console.log('自动续期任务已配置:', result.renewTaskConfigured);
+console.log('涵盖域名:', domains.join(', '));
+console.log('证书文件路径:', certPath);
+console.log('私钥文件路径:', keyPath);
+console.log('自动续期任务已配置:', renewTaskConfigured);
 
 // 4. 可选：验证证书是否包含目标域名
-const cert = new X509Certificate(fs.readFileSync(result.certPath));
-if (cert.subjectAltName?.includes(`DNS:${result.domains[0]}`)) console.log('✓ 验证通过(包含目标域名)');
+const cert = new X509Certificate(fs.readFileSync(certPath));
+if (cert.subjectAltName?.includes(`DNS:${domains[0]}`)) console.log('✓ 验证通过(包含目标域名)');
+
+// 导出结果供其他它模块使用(注意如果有导出需求建议注释或删除步骤3和4的验证代码,避免无畏的文件读取和证书解析)
+export { domains, certPath, keyPath };

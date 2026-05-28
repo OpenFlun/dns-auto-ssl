@@ -1,1 +1,1 @@
-export { setupCertificate as setup } from './lib/certificate.js';
+export { setup } from './lib/certificate.js';

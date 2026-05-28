@@ -1,129 +1,104 @@
-import { elevate, sudo, isAdminUser, platform } from './lib/binaries.js';
-import { kill, list } from './lib/cmd.js';
-import { Service } from './lib/daemon.js';
-import { EventLogger } from './lib/eventlog.js';
-import { exec, execSync, fork, promisify, path, fs, EventEmitter, isPermissionError, getDirname } from './lib/shared.js';
-import { generateXml, createExe } from './lib/winsw.js';
+import { setup } from './lib/certificate.js';
+import { getLegoPath, runLego } from './lib/lego.js';
+import {
+    dnsAutoSslDir, acmeDirectory, execPromise, spawn, path, fs, getDirname, platform, isWindows, dnsAutoSslHome, tmpDir
+} from './lib/shard.js';
 
-// =================================== lib/binaries.js ===================================
+// =================================== lib/certificate.js ===================================
 /**
  * ```js
  * // 文件导出内容
- * elevate();     // 提升当前进程权限（Windows UAC）
- * sudo();        // 使用sudo.exe提升权限（适用于Windows 10及以上版本）
- * isAdminUser(); // 检查当前用户是否拥有管理员权限
- * platform();    // 获取操作系统平台字符串,用于判断当前运行环境是否为Windows
+ * setupCertificate(); // 证书申请 + 自动续期任务安装
  * ```
- * >查看定义:@see {@link elevate}、{@link sudo}、{@link isAdminUser}、{@link platform}
+ * >查看定义:@see {@link setupCertificate}
  */
-declare module './lib/binaries.js' {
-    export * from './lib/binaries.js';
+declare module './lib/certificate.js' {
+    export * from './lib/certificate.js';
 }
 
-// =================================== lib/cmd.js ===================================
+// =================================== lib/lego.js ===================================
 /**
  * ```js
  * // 文件导出内容
- * kill();              // 结束指定PID进程
- * list();              // 列出服务器上正在运行的进程
+ * getLegoPath();              // 对外暴露：获取 lego 的路径（确保已复制到用户目录）
+ * runLego();                  // 执行 lego 命令,列出服务器上正在运行的进程
  * ```
- * >查看定义:@see {@link kill}、{@link list}
+ * >查看定义:@see {@link getLegoPath}、{@link runLego}
  */
-declare module './lib/cmd.js' {
-    export * from './lib/cmd.js';
-}
-
-// =================================== lib/daemon.js ===================================
-/**
- * ```js
- * // 文件导出内容
- * Service{};           // 服务管理类,提供创建、安装、卸载、启动、停止和查询服务状态等功能
- * ```
- * >查看定义:@see {@link Service}
- */
-declare module './lib/daemon.js' {
-    export * from './lib/daemon.js';
-}
-
-// =================================== lib/eventlog.js ===================================
-/**
- * ```js
- * // 文件导出内容
- * EventLogger{};       // 事件日志记录器类,用于向Windows事件查看器写入日志
- * ```
- * >查看定义:@see {@link EventLogger}
- */
-declare module './lib/eventlog.js' {
-    export * from './lib/eventlog.js';
+declare module './lib/lego.js' {
+    export * from './lib/lego.js';
 }
 
 // =================================== lib/shared.js ===================================
 /**
  * 共享模块,导出在多个文件中使用的常用函数和模块
  * ```js
+ * // 公共常量:
+ * const dnsAutoSslDir;  // 存放证书和相关文件的目录路径
+ * const acmeDirectory;  // ACME协议的目录URL,用于与证书颁发机构交互
+ * const dnsAutoSslHome; // 用户主目录路径,用于存放lego等相关文件
+ * const tmpDir;         // 系统临时目录路径,用于存放临时文件
+ * const isWindows;      // 当前操作系统是否为Windows的布尔值
  * // 外部包函数
- * exec();               // 子进程执行命令的函数,提供回调和Promise两种接口
- * execSync;             // 子进程执行命令的同步函数,返回命令输出结果
- * fork();               // 创建一个新的Node.js子进程来运行指定的模块,提供与父进程的通信通道
- * promisify();          // 将Node.js回调风格的函数转换为返回Promise的函数
+ * spawn();              // 子进程生成函数,提供回调和Promise两种接口
+ * platform();           // 获取当前操作系统平台的函数,用于判断是否为Windows等操作系统
+ * tmpDir();             // 获取系统临时目录路径的函数,用于在不同操作系统上获取临时目录路径
  * 模块:
  * path, fs;             // Node.js内置模块,提供文件路径处理、文件系统操作等功能
- * class EventEmitter{}; // Node.js内置模块,提供事件驱动编程的功能,允许对象之间进行事件通信
  * // 自定义函数:
- * isPermissionError();  // 检查错误对象是否表示权限错误的函数,用于判断操作失败是否由于权限不足引起
+ * execPromise();        // 将 child_process.exec 包装成 Promise 的函数,方便使用 async/await 进行异步操作
  * getDirname();         // 获取当前模块目录路径的函数,用于在ES模块环境中替代__dirname变量的功能
  * ```
- * >查看定义:@see {@link exec}、{@link execSync}、{@link fork}、{@link promisify}、{@link path}、{@link fs}、{@link EventEmitter}
- * - 自定义函数:{@link isPermissionError}、{@link getDirname}
+ * >查看定义:
+ * - 公共常量:{@link dnsAutoSslDir}、{@link acmeDirectory}、{@link dnsAutoSslHome}、{@link tmpDir}、{@link isWindows}
+ * - 外部包函数:{@link spawn}、{@link platform}、{@link tmpDir}
+ * - 模块:{@link path}、{@link fs}
+ * - 自定义函数:{@link execPromise}、{@link getDirname}
  */
 declare module './lib/shared.js' {
     export * from './lib/shared.js';
 }
 
-// =================================== lib/winsw.js ===================================
-/**
- * ```js
- * // 文件导出内容
- * generateXml(); // 生成 winsw 配置文件的 XML;
- * createExe();   // 创建 winsw 可执行文件,将 XML 配置文件和 Node.js 脚本打包成一个独立的 Windows 服务可执行文件;
- * ```
- * >查看定义:@see {@link generateXml}、{@link createExe}
- */
-declare module './lib/winsw.js' {
-    export * from './lib/winsw.js';
-}
-
 // =================================== 模块导出入口 ===================================
 /**
- * Windows功能模块 主要功能：
+ * dns-auto-ssl 模块 主要功能：
  * ```js
- * Service{};           // 服务管理类
- * EventLogger{};       // 事件日志记录器类
- * elevate();           // 权限提升(机制:ShellExecute + "runas")
- * sudo();              // 权限提升(机制:sudo.exe)
- * isAdminUser();       // 检查当前用户是否拥有管理员权限
- * kill();              // 结束指定PID进程
- * list();              // 列出服务器上正在运行的进程
+ * setup();           // 服务证书申请 + 自动续期任务安装
  * ```
  * ---
- * >查看定义:@see {@link Service}、{@link EventLogger}、{@link elevate}、{@link sudo}、{@link isAdminUser}、{@link kill}、{@link list}
+ * >查看定义:@see {@link setup}
  * @example
  *  // 基础示例
- *  import { Service } from '@flun/windows';
- *
- *  // 创建服务对象
- *  const svc = new Service({
- *       name: 'Hello World',                  // 服务名称
- *       description: 'nodejs.org 示例服务器',  // 服务描述
- *       script: 'C:\\path\\to\\helloworld.js',// 启动服务的入口脚本路径
- *
- *       // 传递给node进程的选项
- *       nodeOptions: [ '--harmony','--max-old-space-size=4096' ]
- *   });
+    import { setup } from '@flun/dns-auto-ssl';
+
+    try {
+        const { domains, certPath, keyPath, renewTaskConfigured } = await setup({
+            email: 'you@example.com',                       // 你的邮箱，用于 Let's Encrypt 通知
+            domains: ['example.com', 'www.example.com'],    // 需要证书的域名列表（支持多个）
+            dnsProvider: 'alidns',                          // DNS 服务商代码：当前以阿里云为例
+            apiEnv: {
+                ALICLOUD_ACCESS_KEY: '你的AccessKeyId',     // 以阿里云 RAM 用户的 AccessKey ID为例
+                ALICLOUD_SECRET_KEY: '你的AccessKeySecret', // 以阿里云 RAM 用户的 AccessKey Secret为例
+            },
+            // certPath: '自定义路径',                       // 默认安装在你的用户主目录下
+            staging: true,                                  // 使用 Let's Encrypt 测试环境(默认false)
+            wildcard: false,                                // 是否自动添加通配符(默认false)
+            setupRenew: true,                               // 配置自动续期任务(默认true)
+        });
+
+        // 打印申请结果
+        console.log('✅ 证书申请成功！');
+        console.log('涵盖域名:', domains.join(', '));
+        console.log('证书文件路径:', certPath);
+        console.log('私钥文件路径:', keyPath);
+        console.log('自动续期任务已配置:', renewTaskConfigured);
+    } catch (err) {
+        console.error('❌ 失败:', err.message);
+        process.exit(1);
+    }
+    // 导出结果供其它模块使用(注意如果有导出需求建议注释或删除打印代码,避免无畏的文件读取和证书解析)
+    export { domains, certPath, keyPath };
  */
 declare module './index.js' {
-    export { elevate, sudo, isAdminUser } from './lib/binaries.js';
-    export { kill, list } from './lib/cmd.js';
-    export { Service } from './lib/daemon.js';
-    export { EventLogger } from './lib/eventlog.js';
+    export { setup } from './lib/certificate.js';
 }
