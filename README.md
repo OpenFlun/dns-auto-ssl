@@ -24,10 +24,10 @@
 ## 安装
 
 ```bash
-# 全局安装（推荐，命令行随处可用）
+# 全局安装
 npm i -g @flun/dns-auto-ssl
 
-# 或者局部安装（项目内使用）
+# 或者局部安装
 npm i @flun/dns-auto-ssl
 ```
 
@@ -245,7 +245,7 @@ https.createServer(options, (req, res) => {
 # 单行（直接复制）
 dns-auto-ssl --email you@example.com --domains example.com --provider alidns --env ALICLOUD_ACCESS_KEY=xxx --env ALICLOUD_SECRET_KEY=yyy
 
-# 如果未全局安装，使用 npx
+# 如果未全局安装,使用 npx
 npx @flun/dns-auto-ssl --email you@example.com --domains example.com --provider alidns --env ALICLOUD_ACCESS_KEY=xxx --env ALICLOUD_SECRET_KEY=yyy
 ```
 

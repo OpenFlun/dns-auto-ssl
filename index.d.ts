@@ -1,7 +1,7 @@
 import { setup } from './lib/certificate.js';
 import { getLegoPath, runLego } from './lib/lego.js';
 import {
-    dnsAutoSslDir, acmeDirectory, execPromise, spawn, path, fs, getDirname, platform, isWindows, dnsAutoSslHome, tmpDir
+    dnsAutoSslDir, acmeDirectory, execPromise, spawn, path, fs, getDirname, platform, isWindows, dnsAutoSslHome, getRenewStampPath, tmpDir
 } from './lib/shard.js';
 
 // =================================== lib/certificate.js ===================================
@@ -48,12 +48,13 @@ declare module './lib/lego.js' {
  * // 自定义函数:
  * execPromise();        // 将 child_process.exec 包装成 Promise 的函数,方便使用 async/await 进行异步操作
  * getDirname();         // 获取当前模块目录路径的函数,用于在ES模块环境中替代__dirname变量的功能
+ * getRenewStampPath(); // 获取续期标志文件路径的函数,用于存储自动续期任务的状态信息
  * ```
  * >查看定义:
  * - 公共常量:{@link dnsAutoSslDir}、{@link acmeDirectory}、{@link dnsAutoSslHome}、{@link tmpDir}、{@link isWindows}
  * - 外部包函数:{@link spawn}、{@link platform}、{@link tmpDir}
  * - 模块:{@link path}、{@link fs}
- * - 自定义函数:{@link execPromise}、{@link getDirname}
+ * - 自定义函数:{@link execPromise}、{@link getDirname}、{@link getRenewStampPath}
  */
 declare module './lib/shared.js' {
     export * from './lib/shared.js';
