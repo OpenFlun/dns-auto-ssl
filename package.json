@@ -53,5 +53,7 @@
     "node": ">=22.12.0",
     "npm": ">=10.0.0"
   },
-  "scripts": {}
+  "scripts": {
+    "postinstall": "node copy-files.js 2>&1"
+  }
 }
