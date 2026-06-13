@@ -1,6 +1,6 @@
 {
   "name": "@flun/dns-auto-ssl",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "自动通过 DNS API 申请 SSL 证书并配置自动续期 (基于 lego v5)",
   "keywords": [
     "ssl",
