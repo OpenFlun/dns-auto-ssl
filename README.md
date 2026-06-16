@@ -4,7 +4,7 @@
 
 本工具通过 DNS API 自动完成 Let's Encrypt 证书的申请和续期配置，**无需开放 80/443 端口**，支持通配符证书，覆盖 Windows / Linux / macOS，且已内置 lego 二进制文件，**零网络依赖安装**。
 
-如有问题或建议，请联系 [cn@flun.top](mailto:cn@flun.top)
+如有问题或建议，请联系 [open@flun.top](mailto:open@flun.top)
 
 ---
 
@@ -303,4 +303,4 @@ ISC License
 
 欢迎提交 Issue 或 Pull Request 至 [GitHub 仓库](https://github.com/OpenFlun/dns-auto-ssl)
 
-邮箱: [cn@flun.top](mailto:cn@flun.top)
+邮箱: [open@flun.top](mailto:open@flun.top)
