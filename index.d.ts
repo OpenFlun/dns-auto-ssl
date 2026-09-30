@@ -92,13 +92,14 @@ declare module './lib/shared.js' {
  *       console.log('涵盖域名:', domains.join(', '));
  *       console.log('证书文件路径:', certPath);
  *       console.log('私钥文件路径:', keyPath);
+ *       console.log('Windows专属证书文件路径:', pfxPath);
  *       console.log('自动续期任务已配置:', renewTaskConfigured);
  *   } catch (err) {
  *       console.error('❌ 失败:', err.message);
  *       process.exit(1);
  *   }
  *   // 导出结果供其它模块使用(注意如果有导出需求建议注释或删除打印代码,避免无畏的文件读取和证书解析)
- *   export { domains, certPath, keyPath };
+ *   export { domains, certPath, keyPath, pfxPath };
  */
 declare module './index.js' {
     export { setup } from './lib/certificate.js';

@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { X509Certificate } from 'node:crypto';
 
 // 2. 直接调用 setup 函数（顶层 await，无需 async 包装）
-const { domains, certPath, keyPath, renewTaskConfigured } = await setup({
+const { domains, certPath, keyPath, pfxPath, renewTaskConfigured } = await setup({
 	// ---------- 必填项 ----------
 	email: 'you@example.com',                    // 你的邮箱，用于 Let's Encrypt 通知
 	domains: ['example.com', 'www.example.com'], // 需要证书的域名列表（支持多个）
@@ -35,6 +35,7 @@ console.log('✅ 证书申请成功！');
 console.log('涵盖域名:', domains.join(', '));
 console.log('证书文件路径:', certPath);
 console.log('私钥文件路径:', keyPath);
+console.log('Windows专属证书文件路径:', pfxPath);
 console.log('自动续期任务已配置:', renewTaskConfigured);
 
 // 4. 可选：验证证书是否包含目标域名
@@ -42,4 +43,4 @@ const cert = new X509Certificate(fs.readFileSync(certPath));
 if (cert.subjectAltName?.includes(`DNS:${domains[0]}`)) console.log('✓ 验证通过(包含目标域名)');
 
 // 导出结果供其他它模块使用(注意如果有导出需求建议注释或删除步骤3和4的验证代码及辅助导入的模块,避免无畏的文件读取和证书解析)
-export { domains, certPath, keyPath };
+export { domains, certPath, keyPath, pfxPath };

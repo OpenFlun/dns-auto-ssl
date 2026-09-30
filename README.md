@@ -10,10 +10,12 @@
 
 ## 核心特性
 
-- ✅ **全自动**：一次配置，自动申请 + 自动续期（每天 03:00 检查）
+- ✅ **全自动**：一次配置，自动申请 + 自动续期（每天 03:00 + 每次登录时检查）
 - ✅ **零网络依赖**：已预置各平台 lego v5 二进制文件，安装即用
 - ✅ **支持通配符**：一键申请 `*.example.com` 证书
 - ✅ **跨平台**：Windows（计划任务）/ Linux & macOS（crontab）自动续期
+- ✅ **Windows 专用 PFX**：自动探测 openssl，静默生成 `.pfx`，可直接喂给 IIS
+- ✅ **自愈机制**：lego 失败不刷新时间戳，下次调用自动重装任务并重新申请
 - ✅ **任意 DNS 服务商**：支持 lego 全部 180+ 种 DNS API（阿里云、腾讯云、Cloudflare、AWS Route53 等）
 - ✅ **ESM 原生**：基于现代 JavaScript 模块系统
 
@@ -130,31 +132,32 @@ import fs from 'node:fs';
 import { X509Certificate } from 'node:crypto';
 
 // 2. 直接调用 setup 函数（顶层 await，无需 async 包装）
-const { domains, certPath, keyPath, renewTaskConfigured } = await setup({
-	// ---------- 必填项 ----------
-	email: 'you@example.com',                    // 你的邮箱，用于 Let's Encrypt 通知
-	domains: ['example.com', 'www.example.com'], // 需要证书的域名列表（支持多个）
-	dnsProvider: 'alidns',                       // DNS 服务商代码：阿里云=alidns，腾讯云=dnspod，Cloudflare=cloudflare
+const { domains, certPath, keyPath, pfxPath, renewTaskConfigured } = await setup({
+        // ---------- 必填项 ----------
+        email: 'you@example.com',                    // 你的邮箱，用于 Let's Encrypt 通知
+        domains: ['example.com', 'www.example.com'], // 需要证书的域名列表（支持多个）
+        dnsProvider: 'alidns',                       // DNS 服务商代码：阿里云=alidns，腾讯云=dnspod，Cloudflare=cloudflare
 
-	// ---------- API 密钥（根据 dnsProvider 选择对应的键值对）----------
-	apiEnv: {
-		// 如果你使用【阿里云】，请填写以下两项，并注释掉其他服务商的配置
-		ALICLOUD_ACCESS_KEY: '你的AccessKeyId',     // 阿里云 RAM 用户的 AccessKey ID
-		ALICLOUD_SECRET_KEY: '你的AccessKeySecret', // 阿里云 RAM 用户的 AccessKey Secret
+        // ---------- API 密钥（根据 dnsProvider 选择对应的键值对）----------
+        apiEnv: {
+                // 如果你使用【阿里云】，请填写以下两项，并注释掉其他服务商的配置
+                ALICLOUD_ACCESS_KEY: '你的AccessKeyId',     // 阿里云 RAM 用户的 AccessKey ID
+                ALICLOUD_SECRET_KEY: '你的AccessKeySecret', // 阿里云 RAM 用户的 AccessKey Secret
 
-		// 如果你使用【腾讯云 DNSPod】，请取消注释以下两项，并注释掉阿里云的部分
-		// TENCENTCLOUD_SECRET_ID: '你的SecretId',     // 腾讯云 API 密钥的 SecretId
-		// TENCENTCLOUD_SECRET_KEY: '你的SecretKey',   // 腾讯云 API 密钥的 SecretKey
+                // 如果你使用【腾讯云 DNSPod】，请取消注释以下两项，并注释掉阿里云的部分
+                // TENCENTCLOUD_SECRET_ID: '你的SecretId',     // 腾讯云 API 密钥的 SecretId
+                // TENCENTCLOUD_SECRET_KEY: '你的SecretKey',   // 腾讯云 API 密钥的 SecretKey
 
-		// 如果你使用【Cloudflare】，请取消注释以下一项，并注释掉其他部分
-		// CF_API_TOKEN: '你的Cloudflare APIToken',    // Cloudflare API Token（需要 Zone:DNS:Edit 权限）
-	},
+                // 如果你使用【Cloudflare】，请取消注释以下一项，并注释掉其他部分
+                // CF_API_TOKEN: '你的Cloudflare APIToken',    // Cloudflare API Token（需要 Zone:DNS:Edit 权限）
+        },
 
-	// ---------- 可选参数 ----------
-	// certPath: '自定义路径', // 自定义证书路径（默认安装在你的用户主目录下）
-	wildcard: true,       // 是否自动添加通配符域名（例如 *.example.com,默认 false）
-	setupRenew: true,     // 是否配置系统自动续期任务（默认 true，每天凌晨3点检查）
-	staging: false,       // 是否使用 Let's Encrypt 测试环境（用于避免速率限制,正式环境请保持默认的 false）
+        // ---------- 可选参数 ----------
+        // certPath: '自定义路径',          // 自定义证书路径（默认安装在你的用户主目录下）
+        wildcard: true,                    // 是否自动添加通配符域名（例如 *.example.com,默认 false）
+        setupRenew: true,                  // 是否配置系统自动续期任务（默认 true）
+        staging: false,                    // 是否使用 Let's Encrypt 测试环境（正式环境请保持默认 false）
+        pfxPassword: 'iisPass789',         // Windows PFX 密码（仅 Windows 生效，默认 'iisPass789'）
 });
 
 // 3. 打印申请结果
@@ -162,6 +165,7 @@ console.log('✅ 证书申请成功！');
 console.log('涵盖域名:', domains.join(', '));
 console.log('证书文件路径:', certPath);
 console.log('私钥文件路径:', keyPath);
+console.log('Windows PFX 路径:', pfxPath);  // 仅 Windows 平台文件真实存在
 console.log('自动续期任务已配置:', renewTaskConfigured);
 
 // 4. 可选：验证证书是否包含目标域名
@@ -169,7 +173,7 @@ const cert = new X509Certificate(fs.readFileSync(certPath));
 if (cert.subjectAltName?.includes(`DNS:${domains[0]}`)) console.log('✓ 验证通过(包含目标域名)');
 
 // 导出结果供其它模块使用(注意如果有导出需求建议注释或删除步骤3和4的验证代码,避免无畏的文件读取和证书解析)
-export { domains, certPath, keyPath };
+export { domains, certPath, keyPath, pfxPath };
 ```
 
 > **注意**：`apiEnv` 中的**键名必须与上表中的环境变量名称完全一致**（区分大小写）。不同的 DNS 服务商需要提供不同的键值对。
@@ -186,6 +190,9 @@ export { domains, certPath, keyPath };
 证书文件：
 - `yourdomain.crt`  – 证书文件
 - `yourdomain.key`  – 私钥文件
+- `yourdomain.pfx`  – Windows 专用 PFX（**仅 Windows 平台自动生成**，密码由 `pfxPassword` 指定，默认 `iisPass789`）
+- `yourdomain.issuer.crt` – 中间证书（lego 自动生成）
+- `yourdomain.json` – lego 元数据
 
 在你的 Node.js 项目中使用：
 
@@ -208,12 +215,37 @@ https.createServer(options, (req, res) => {
 
 > **权限提示**：监听 443 端口需要管理员/root 权限。Linux 下可使用 `sudo`，Windows 需以管理员身份运行终端。
 
+### Windows 专用：PFX 与 IIS
+
+在 Windows 上，`setup()` 会在证书生成或更新后，自动探测 openssl 并静默生成 `.pfx`（探测顺序：PATH → Qt → OpenSSL-Win64 → Git 自带 → 其它常见路径）。用户无需任何配置。
+
+拿到 `pfxPath` 后，可直接导入 IIS：
+
+```powershell
+$pw = ConvertTo-SecureString 'iisPass789' -AsPlainText -Force
+Import-PfxCertificate -FilePath "C:\Users\你\.dns-auto-ssl\certs\lego\certificates\example.com.pfx" -CertStoreLocation Cert:\LocalMachine\My -Password $pw
+```
+
+或交给 IIS 绑定：
+
+```powershell
+Import-Module WebAdministration
+$cert = Get-ChildItem Cert:\LocalMachine\My | Where-Object { $_.Subject -like "*example.com*" } | Select-Object -First 1
+Get-WebBinding -Protocol https | ForEach-Object { $_.AddSslCertificate($cert.Thumbprint, 'My') }
+```
+
+> **openssl 未找到时**：`setup()` 会 warn 并跳过 PFX 生成，不影响证书申请和续期。安装任意 openssl 到 PATH 或上述常见路径即可自动恢复。
+
 ---
 
 ## 自动续期机制
 
 - 证书有效期为 90 天，续期任务会在证书到期前 **30 天** 内自动更新
-- 续期任务每天凌晨 **03:00** 执行一次（由系统定时任务管理）
+- **Windows**：计划任务在每天凌晨 **03:00** 以及**每次用户登录时**各检查一次
+- **Linux / macOS**：crontab 每天凌晨 **03:00** 执行
+- **自愈机制**：lego 执行失败时不会刷新时间戳；下次调用 `setup()` 时检测到时间戳过期，会自动重装任务并重新申请证书
+- **证书缺失自恢复**：若 `.crt` 被误删，续期任务会自动清理 lego 元数据并重新申请
+- **PFX 自动重建**：Windows 平台证书指纹变化时，`.pfx` 会自动重新生成
 - **无需任何干预**，只要 DNS API 密钥仍然有效即可
 
 **验证续期任务是否添加成功**
@@ -221,7 +253,12 @@ https.createServer(options, (req, res) => {
 - **Linux/macOS**: `crontab -l | grep dns-auto-ssl`
 - **Windows**: 打开“任务计划程序” → 查找以主域名命名的计划任务名
 
-> 💡 若需立即测试续期，可手动执行 crontab 中的命令（复制出来运行）
+**查看续期日志**
+
+- **Windows**: `%USERPROFILE%\.dns-auto-ssl\域名.renew.log`
+- **Linux/macOS**: `~/.dns-auto-ssl/域名.log`
+
+> 💡 若需立即测试续期，可手动执行续期脚本（Windows：`%USERPROFILE%\.dns-auto-ssl\域名.bat`；Linux/macOS：`~/.dns-auto-ssl/域名.sh`）
 
 ---
 
@@ -230,6 +267,12 @@ https.createServer(options, (req, res) => {
 ### ❌ 错误：`flag provided but not defined: -email`
 
 **原因**：lego v5 要求 `run` 命令必须放在最前面。本工具已内置正确顺序，如果遇到此错误请确认你使用的是最新版本的 `@flun/dns-auto-ssl`，或者你直接调用了 lego 二进制。
+
+### ❌ 错误：`403 :: urn:ietf:params:acme:error:unauthorized :: Could not validate ARI 'replaces' field`
+
+**原因**：lego 4.16+ 默认启用 ARI（ACME Renewal Information）续期信息，续期时会发送 `replaces` 字段。当本地 lego 的 ARI 状态与服务端不一致（账号变更、证书目录被清理、lego 升级等），就会 403。
+
+**解决**：本工具已内置 `--ari-disable`，如遇此错误请升级到最新版本。
 
 ### ❌ 错误：`too many certificates already issued for this exact set of identifiers`
 
@@ -246,11 +289,34 @@ https.createServer(options, (req, res) => {
 
 **解决**：检查 `--provider` 参数是否与 lego 官方命名一致（如 `alidns` 而非 `aliyun`）。参考 [lego 全部提供商列表](https://go-acme.github.io/lego/dns/)。
 
+### ❌ 错误：`DNS problem: SERVFAIL looking up TXT for _acme-challenge.xxx`
+
+**原因**：Let's Encrypt 的验证服务器查询 `_acme-challenge` 的 TXT 记录时，权威 DNS 返回错误。常见原因：
+
+- 阿里云 DNS 中残留 `_acme-challenge` 记录与本次生成的记录冲突
+- 存在 CAA 记录禁止 Let's Encrypt 签发
+- DNSSEC 配置问题
+
+**解决**：登录 DNS 服务商控制台，检查并清理 `_acme-challenge` 和 CAA 记录；如开启 DNSSEC，可暂时关闭后重试。
+
 ### ❌ 错误：`EACCES: permission denied` 监听 443 端口
 
 **解决**：
 - **Linux/macOS**：使用 `sudo node server.js`
 - **Windows**：以管理员身份运行命令提示符或 PowerShell
+
+### ⚠️ Windows 未生成 `.pfx`
+
+本工具自动探测 openssl：
+
+1. 先查 PATH（`where openssl`）
+2. 再查常见路径：
+   - `C:\Qt\Tools\OpenSSL\bin\bin\openssl.exe`
+   - `C:\Program Files\OpenSSL-Win64\bin\openssl.exe`
+   - `C:\Program Files\Git\usr\bin\openssl.exe`（Git 自带）
+   - 等
+
+都找不到时会 warn 并跳过 PFX，**不影响证书申请和续期**。安装任意 openssl 到 PATH 或上述路径即可自动恢复。
 
 ### ❌ Windows PowerShell 中执行多行命令报错：`Missing expression after unary operator '--'`
 
@@ -280,15 +346,17 @@ npx @flun/dns-auto-ssl --email you@example.com --domains example.com --provider 
 ### ⚠️ 环境变量安全
 
 - **不要**将 API 密钥硬编码在代码中，推荐使用 `--env` 参数或 `.env` 文件
-- **Windows 计划任务**：密钥会以明文形式保存在计划任务命令中，请确保系统安全（一般仅限本地）
-- **Linux crontab**：环境变量同样会明文出现在 crontab 中，建议控制服务器访问权限
+- **Windows**：密钥明文保存在 `%USERPROFILE%\.dns-auto-ssl\域名.bat` 中，请确保系统安全（一般仅限本地）
+- **Linux/macOS**：环境变量同样明文出现在 crontab 和 `~/.dns-auto-ssl/域名.sh` 中，建议控制服务器访问权限
 
 ### ⚠️ 续期任务不执行怎么办？
 
 1. 检查系统时间是否正确（证书续期依赖系统时间）
-2. 手动执行 crontab 中的命令，观察错误输出
-3. 确保 DNS API 密钥仍然有效且未过期
-4. 检查网络是否能正常访问 Let's Encrypt API
+2. 查看续期日志：Windows `%USERPROFILE%\.dns-auto-ssl\域名.renew.log`；Linux/macOS `~/.dns-auto-ssl/域名.log`
+3. 手动执行续期脚本，观察错误输出
+4. 确保 DNS API 密钥仍然有效且未过期
+5. 检查网络是否能正常访问 Let's Encrypt API
+6. 若脚本丢失或损坏，重新运行 `setup()` 即可（时间戳过期后会自动重装）
 
 ### ⚠️ 切换 DNS 服务商时的注意事项
 
@@ -311,6 +379,8 @@ dns-auto-ssl --provider dnspod --env TENCENTCLOUD_SECRET_ID=xxx --env TENCENTCLO
 rm -rf ~/.dns-auto-ssl                 # Linux/macOS
 rmdir /s %USERPROFILE%\.dns-auto-ssl   # Windows
 ```
+
+> 清理后需重新运行 `setup()` 或 CLI 才能重新申请证书并安装续期任务。
 
 ---
 
