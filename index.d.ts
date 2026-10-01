@@ -93,7 +93,7 @@ declare module './lib/shared.js' {
  *       console.log('证书文件路径:', certPath);
  *       console.log('私钥文件路径:', keyPath);
  *       console.log('Windows专属证书文件路径:', pfxPath);
- *       console.log('自动续期任务已配置:', renewTaskConfigured);
+ *       console.log('自动续期任务是否已配置:', renewTaskConfigured);
  *   } catch (err) {
  *       console.error('❌ 失败:', err.message);
  *       process.exit(1);

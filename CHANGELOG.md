@@ -1,4 +1,13 @@
-# 变更日志
+﻿# 变更日志
+
+## [1.1.1] - 2026-10-01 11:33
+
+### Fixed
+- 修复 Electron 等无控制台环境下启动应用时反复弹出命令行黑窗的问题：`lib/shard.js` 中 `execPromise` 包装层默认注入 `windowsHide: true`
+- 修复证书缺失/过期触发 `lego` 时可能弹出的命令行黑窗：`lib/lego.js` 中 `spawn` 显式加上 `windowsHide: true`
+
+[1.1.1]: https://github.com/OpenFlun/dns-auto-ssl/compare/v1.1.0...v1.1.1
+
 ## [1.1.0] - 2026-09-30 22:39
 
 ### Added

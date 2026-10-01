@@ -36,7 +36,7 @@ console.log('涵盖域名:', domains.join(', '));
 console.log('证书文件路径:', certPath);
 console.log('私钥文件路径:', keyPath);
 console.log('Windows专属证书文件路径:', pfxPath);
-console.log('自动续期任务已配置:', renewTaskConfigured);
+console.log('自动续期任务是否已配置:', renewTaskConfigured);
 
 // 4. 可选：验证证书是否包含目标域名
 const cert = new X509Certificate(fs.readFileSync(certPath));
