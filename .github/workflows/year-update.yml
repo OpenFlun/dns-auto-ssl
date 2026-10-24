@@ -4,7 +4,7 @@ on:
   schedule:
     # 每年1月1日 00:00 UTC 执行
     - cron: '0 16 31 12 *'
-  # 也可以手动触发测试（可选）
+  # 也可以手动触发测试(可选)
   workflow_dispatch:
 
 jobs:
@@ -44,7 +44,7 @@ jobs:
 
       - name: Bump version in package.json
         run: |
-          # 增加补丁版本号，但不自动打 tag 和 commit
+          # 增加补丁版本号,但不自动打 tag 和 commit
           npm version patch --no-git-tag-version
           echo "Version bumped in package.json"
 

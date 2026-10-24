@@ -1,7 +1,8 @@
 import { setup } from './lib/certificate.js';
 import { getLegoPath, runLego } from './lib/lego.js';
 import {
-    dnsAutoSslDir, acmeDirectory, execPromise, spawn, path, fs, getDirname, platform, isWindows, dnsAutoSslHome, getRenewStampPath, tmpDir
+    dnsAutoSslDir, acmeDirectory, execPromise, spawn, path, fs, getDirname, platform, isWindows,
+    dnsAutoSslHome, getRenewStampPath, tmpDir
 } from './lib/shard.js';
 
 // =================================== lib/certificate.js ===================================
@@ -20,7 +21,7 @@ declare module './lib/certificate.js' {
 /**
  * ```js
  * // 文件导出内容
- * getLegoPath();              // 对外暴露：获取 lego 的路径（确保已复制到用户目录）
+ * getLegoPath();              // 对外暴露:获取 lego 的路径(确保已复制到用户目录)
  * runLego();                  // 执行 lego 命令,列出服务器上正在运行的进程
  * ```
  * >查看定义:@see {@link getLegoPath}、{@link runLego}
@@ -62,7 +63,7 @@ declare module './lib/shared.js' {
 
 // =================================== 模块导出入口 ===================================
 /**
- * dns-auto-ssl 模块 主要功能：
+ * dns-auto-ssl 模块 主要功能:
  * ```js
  * setup();           // 服务证书申请 + 自动续期任务安装
  * ```
@@ -74,9 +75,9 @@ declare module './lib/shared.js' {
  *
  *   try {
  *       const { domains, certPath, keyPath, renewTaskConfigured } = await setup({
- *           email: 'you@example.com',                       // 你的邮箱，用于 Let's Encrypt 通知
- *           domains: ['example.com', 'www.example.com'],    // 需要证书的域名列表（支持多个）
- *           dnsProvider: 'alidns',                          // DNS 服务商代码：当前以阿里云为例
+ *           email: 'you@example.com',                       // 你的邮箱,用于 Let's Encrypt 通知
+ *           domains: ['example.com', 'www.example.com'],    // 需要证书的域名列表(支持多个)
+ *           dnsProvider: 'alidns',                          // DNS 服务商代码:当前以阿里云为例
  *           apiEnv: {
  *               ALICLOUD_ACCESS_KEY: '你的AccessKeyId',     // 以阿里云 RAM 用户的 AccessKey ID为例
  *               ALICLOUD_SECRET_KEY: '你的AccessKeySecret', // 以阿里云 RAM 用户的 AccessKey Secret为例
@@ -88,7 +89,7 @@ declare module './lib/shared.js' {
  *       });
  *
  *       // 打印申请结果
- *       console.log('✅ 证书申请成功！');
+ *       console.log('✅ 证书申请成功!');
  *       console.log('涵盖域名:', domains.join(', '));
  *       console.log('证书文件路径:', certPath);
  *       console.log('私钥文件路径:', keyPath);

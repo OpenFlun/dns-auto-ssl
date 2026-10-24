@@ -6,12 +6,13 @@ import { setup } from '../index.js';
 
 const program = new Command();
 program.name('dns-auto-ssl')
-    .description('自动通过 DNS API 申请 Let\'s Encrypt SSL 证书，支持通配符和自动续期')
+    .description('自动通过 DNS API 申请 Let\'s Encrypt SSL 证书,支持通配符和自动续期')
     .option('-e, --email <email>', '邮箱地址 (必填)')
-    .option('-d, --domains <domains>', '域名，多个用逗号分隔 (必填)')
-    .option('-p, --provider <provider>', 'DNS 服务商代码 (如 alidns, dnspod, cloudflare, route53 等，与 lego 官方代码保持一致)',
+    .option('-d, --domains <domains>', '域名,多个用逗号分隔 (必填)')
+    .option('-p, --provider <provider>',
+        'DNS 服务商代码 (如 alidns, dnspod, cloudflare, route53 等,与 lego 官方代码保持一致)',
         value => value.toLowerCase())
-    .option('--env <env...>', '为 DNS 插件设置环境变量，格式为 KEY=value，可重复使用', (value, previous) => {
+    .option('--env <env...>', '为 DNS 插件设置环境变量,格式为 KEY=value,可重复使用', (value, previous) => {
         const envArray = previous || [];
         envArray.push(value);
         return envArray;
@@ -39,13 +40,14 @@ program.name('dns-auto-ssl')
 
         // 为极少数知名提供商提供友好的缺省值提示
         if (provider === 'alidns' && !apiEnv.ALICLOUD_ACCESS_KEY)
-            console.warn('⚠️ 警告: 阿里云 DNS 通常需要设置 ALICLOUD_ACCESS_KEY 和 ALICLOUD_SECRET_KEY 环境变量。');
+            console.warn('⚠️ 警告: 阿里云 DNS 通常需要设置 ALICLOUD_ACCESS_KEY 和 ALICLOUD_SECRET_KEY 环境变量;');
         if (provider === 'dnspod' && !apiEnv.TENCENTCLOUD_SECRET_ID)
-            console.warn('⚠️ 警告: 腾讯云 DNS (DNSPod) 通常需要设置 TENCENTCLOUD_SECRET_ID 和 TENCENTCLOUD_SECRET_KEY 环境变量。');
+            console.warn('⚠️ 警告: 腾讯云 DNS (DNSPod) 通常需要设置 TENCENTCLOUD_SECRET_ID ' +
+                '和 TENCENTCLOUD_SECRET_KEY 环境变量;');
         if (provider === 'cloudflare' && !apiEnv.CF_API_TOKEN)
-            console.warn('⚠️ 警告: Cloudflare DNS 通常需要设置 CF_API_TOKEN 环境变量。');
+            console.warn('⚠️ 警告: Cloudflare DNS 通常需要设置 CF_API_TOKEN 环境变量;');
         if (Object.keys(apiEnv).length === 0)
-            console.warn('⚠️ 警告: 没有提供任何环境变量，请确保你的 DNS 提供商所需的凭证已通过 --env 参数传递。');
+            console.warn('⚠️ 警告: 没有提供任何环境变量,请确保你的 DNS 提供商所需的凭证已通过 --env 参数传递;');
 
         try {
             const result = await setup({

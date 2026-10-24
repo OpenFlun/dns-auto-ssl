@@ -16,11 +16,11 @@ const __filename = fileURLToPath(import.meta.url), __dirname = path.dirname(__fi
 const copyFile = () => {
     console.log(`🔍 检查 ${fileName} 文件...`), console.log(`📁 项目根目录:${targetDir}`);
     try {
-        // 目标目录不是 Node 项目 || 包自身的 npm install（开发调试）→ 跳过
+        // 目标目录不是 Node 项目 || 包自身的 npm install(开发调试)→ 跳过
         if (!fs.existsSync(path.join(targetDir, 'package.json'))) return true;
         if (targetDir === path.resolve(__dirname, '..')) return true;
         if (fs.existsSync(targetFile)) return true; // 目标文件已存在 → 直接返回
-        console.log(`⚠️ 在项目根目录未找到 ${fileName} 文件，正在创建...`);
+        console.log(`⚠️ 在项目根目录未找到 ${fileName} 文件,正在创建...`);
 
         fs.copyFileSync(sourceFile, targetFile);     // 复制源文件到项目根目录
         console.log(`✓ 已创建 ${fileName} 示例文件:${targetFile}`);
