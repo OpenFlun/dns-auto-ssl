@@ -58,7 +58,6 @@ Linux / macOS,且已内置 lego 二进制文件,**零网络依赖安装**;
 {
   "allowScripts": {
     "@flun/dns-auto-ssl": true
-    // 如果依赖的其它包(如 bcrypt、electron-winstaller 等)也有脚本,请按需添加,格式相同
   }
 }
 ```
