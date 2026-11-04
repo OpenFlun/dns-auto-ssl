@@ -103,7 +103,7 @@ dns-auto-ssl setup --email you@example.com --domains example.com --provider alid
 | `-e, --email <email>`       | 邮箱地址,必填,用于 Let's Encrypt 通知                      |
 | `-d, --domains <domains>`   | 域名,多个用逗号分隔(如 `example.com,www.example.com`),必填 |
 | `-p, --provider <provider>` | DNS 服务商代码,必填,与 lego 官方命名一致                   |
-| `--env <KEY=value>`         | 为 DNS 插件设置环境变量,可重复使用;未提供时仅警告                               |
+| `--env <KEY=value>`         | 为 DNS 插件设置环境变量,可重复使用;未提供时仅警告          |
 | `--wildcard`                | 为每个裸域自动添加通配符域名(`*.example.com`)              |
 | `--pfx-password <password>` | PFX 私钥密码(默认 iisPass789)                              |
 | `--cert-path <path>`        | 自定义证书存储目录(默认 `~/.dns-auto-ssl/certs/lego`)      |
@@ -377,5 +377,6 @@ ISC License
 ## 贡献
 
 欢迎提交 Issue 或 Pull Request 至 [GitHub 仓库](https://github.com/OpenFlun/dns-auto-ssl)
+中国:[gitee 仓库](https://gitee.com/OpenFlun/dns-auto-ssl)
 
 邮箱: [open@flun.top](mailto:open@flun.top)
