@@ -29,8 +29,6 @@ Linux / macOS,且已内置 lego 二进制文件,**零网络依赖安装**;
 ```
 @flun/dns-auto-ssl/
 ├── bin/cli.js          命令行入口(bin: dns-auto-ssl)
-├── index.js            库入口,导出 setup
-├── index.d.ts          类型声明
 ├── lib/certificate.js  证书申请与续期主流程
 ├── lib/lego.js         lego 二进制定位与调用
 ├── lib/renew-task.js   自动续期任务
@@ -38,9 +36,11 @@ Linux / macOS,且已内置 lego 二进制文件,**零网络依赖安装**;
 ├── prebuilt/           各平台 lego 二进制(darwin / linux / win32)
 ├── copy-files.js       postinstall 复制配置文件
 ├── DnsAutoSSL.js       使用示例
+├── index.js            库入口,导出 setup
+├── index.d.ts          类型声明
 ├── package.json        包配置
-├── README.md           本文件
 ├── CHANGELOG.md        更新日志
+├── README.md           本文件
 └── LICENSE             许可
 ```
 
@@ -62,9 +62,6 @@ Linux / macOS,且已内置 lego 二进制文件,**零网络依赖安装**;
   }
 }
 ```
-
-> 如果你信任所有安装包,也可以直接在项目 `.npmrc` 中设置 `allow-scripts = false`(表示关闭脚本拦截,所有脚本均允许执行),
-  或删除 `ignore-script`字段;
 
 ---
 ## 安装

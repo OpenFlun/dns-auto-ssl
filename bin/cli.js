@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import { Command } from 'commander';
 import { dnsAutoSslDir } from '../lib/shard.js';
 import { setup } from '../index.js';
+import { copyFile } from '../copy-files.js';
 
 // 输出命令用法与 setup 选项;
 const printHelp = program => {
@@ -100,6 +101,11 @@ const main = () => {
     .option('--no-renew', '不配置自动续期任务')
     .option('--staging', "使用 Let's Encrypt 测试环境,acme-staging")
     .action(runSetup);
+
+  program.command('example')
+    .description('生成 DnsAutoSSL.js 示例文件到项目根目录')
+    .helpOption(false)
+    .action(copyFile);
 
   if (!args.length || args.includes('-h') || args.includes('--help') || args[0] === 'help')
     return printHelp(program), process.exit(0);

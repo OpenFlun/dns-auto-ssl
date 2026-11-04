@@ -39,15 +39,15 @@
     "dns-auto-ssl": "./bin/cli.js"
   },
   "files": [
-    "index.js",
-    "index.d.ts",
     "bin/",
     "lib/",
     "prebuilt/",
     "copy-files.js",
     "DnsAutoSSL.js",
-    "README.md",
+    "index.js",
+    "index.d.ts",
     "CHANGELOG.md",
+    "README.md",
     "LICENSE"
   ],
   "dependencies": {
