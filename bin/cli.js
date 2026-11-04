@@ -101,11 +101,7 @@ const main = () => {
     .option('--staging', "使用 Let's Encrypt 测试环境,acme-staging")
     .action(runSetup);
 
-  program.command('example')
-    .description('生成 DnsAutoSSL.js 示例文件到项目根目录')
-    .helpOption(false)
-    .action(copyFile);
-
+  program.command('example').description('生成 DnsAutoSSL.js 示例文件到项目根目录').helpOption(false).action(copyFile);
   if (!args.length || args.includes('-h') || args.includes('--help') || args[0] === 'help')
     return printHelp(program), process.exit(0);
   try { program.parse(); } catch (err) { printHelp(program), process.exit(err.exitCode || 1); }
