@@ -69,8 +69,7 @@ const runSetup = async options => {
     console.log(chalk.gray('私钥路径: ') + result.keyPath);
     if (result.renewTaskConfigured) console.log(chalk.gray('自动续期: ') + '已配置,每天凌晨 03:00 执行');
   } catch (err) {
-    console.error(chalk.red('✗ ') + '失败: ' + err.message);
-    process.exit(1);
+    console.error(chalk.red('✗ ') + '失败: ' + err.message), process.exit(1);
   }
 };
 
@@ -109,11 +108,7 @@ const main = () => {
 
   if (!args.length || args.includes('-h') || args.includes('--help') || args[0] === 'help')
     return printHelp(program), process.exit(0);
-  try {
-    program.parse();
-  } catch (err) {
-    printHelp(program), process.exit(err.exitCode || 1);
-  }
+  try { program.parse(); } catch (err) { printHelp(program), process.exit(err.exitCode || 1); }
 };
 
 main();
