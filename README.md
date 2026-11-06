@@ -381,6 +381,6 @@ ISC License
 ## 贡献
 
 欢迎提交 Issue 或 Pull Request 至 [GitHub 仓库](https://github.com/OpenFlun/dns-auto-ssl)
-中国:[gitee 仓库](https://gitee.com/OpenFlun/dns-auto-ssl)
+中国镜像:[gitee 仓库](https://gitee.com/OpenFlun/dns-auto-ssl)
 
 邮箱: [open@flun.top](mailto:open@flun.top)
